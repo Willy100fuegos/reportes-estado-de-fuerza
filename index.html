@@ -7,22 +7,52 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Estilos Base */
         .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .glass-card { background: #161b2a; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
         .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .logo-pixmedia { width: 180px; height: auto; object-fit: contain; }
         
-        /* Efecto de Imagen */
+        /* Efecto de Imagen en Tarjeta */
         .img-overlay { position: relative; overflow: hidden; aspect-ratio: 16/9; }
         .img-overlay img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform 0.5s ease; }
         .glass-card:hover .img-overlay img { transform: scale(1.05); }
         .overlay-icon { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
         .glass-card:hover .overlay-icon { opacity: 1; }
 
-        /* Modal */
-        #imageModal { transition: opacity 0.3s ease; }
+        /* --- Estilos del Modal y Zoom --- */
+        #imageModal { transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         #imageModal.hidden { pointer-events: none; opacity: 0; }
         #imageModal:not(.hidden) { pointer-events: auto; opacity: 1; }
+
+        /* Contenedor de la imagen zoomable */
+        #zoomContainer {
+            overflow: hidden;
+            /* Altura máxima relativa a la pantalla para evitar scroll del body */
+            max-height: 85vh; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 0.5rem;
+            cursor: zoom-in; /* Cursor inicial lupa */
+        }
+
+        #modalImage {
+            /* Importante: max-width/height inicial para que quepa en pantalla sin zoom */
+            max-width: 100%;
+            max-height: 80vh; 
+            object-fit: contain;
+            transform-origin: center center;
+            transition: transform 0.3s ease-out; /* Transición suave al hacer zoom */
+            /* Evita que la imagen se ponga azul al arrastrar */
+            user-select: none; 
+            -webkit-user-drag: none;
+        }
+
+        /* Clases utilitarias para los cursores de arrastre */
+        .cursor-grab { cursor: grab !important; }
+        .cursor-grabbing { cursor: grabbing !important; }
     </style>
 </head>
 <body class="bg-[#0b0f1a] text-slate-300 font-sans min-h-screen flex flex-col">
@@ -48,7 +78,7 @@
     <main class="flex-grow px-4 py-16 max-w-7xl mx-auto w-full">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/sqaTD0U.png', 'Braskem Idesa')">
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/sqaTD0U.png', 'Braskem Idesa - Vista Detallada')">
                 <div class="img-overlay">
                     <img src="http://imgfz.com/i/sqaTD0U.png" alt="Braskem UI">
                     <div class="overlay-icon">
@@ -68,7 +98,7 @@
                 </div>
             </article>
 
-            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/8DBkKb0.png', 'Cazador TQPM')">
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/8DBkKb0.png', 'Cazador TQPM - Vista Detallada')">
                 <div class="img-overlay">
                     <img src="http://imgfz.com/i/8DBkKb0.png" alt="TQPM UI">
                     <div class="overlay-icon">
@@ -88,7 +118,7 @@
                 </div>
             </article>
 
-            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/l0I3CeZ.png', 'Centurión Logística')">
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/l0I3CeZ.png', 'Centurión Logística - Vista Detallada')">
                 <div class="img-overlay">
                     <img src="http://imgfz.com/i/l0I3CeZ.png" alt="Centurion UI">
                     <div class="overlay-icon">
@@ -108,7 +138,7 @@
                 </div>
             </article>
 
-            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/BTPu2XG.png', 'SESCA Veracruz')">
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/BTPu2XG.png', 'SESCA Veracruz - Vista Detallada')">
                 <div class="img-overlay">
                     <img src="http://imgfz.com/i/BTPu2XG.png" alt="Veracruz UI">
                     <div class="overlay-icon">
@@ -128,7 +158,7 @@
                 </div>
             </article>
 
-            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/9OVPQcS.png', 'Gorat Master')">
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/9OVPQcS.png', 'Gorat Master - Vista Detallada')">
                 <div class="img-overlay">
                     <img src="http://imgfz.com/i/9OVPQcS.png" alt="Coatza UI">
                     <div class="overlay-icon">
@@ -155,36 +185,141 @@
         <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">Tecnología Propietaria | Desarrollo Privado</p>
     </footer>
 
-    <div id="imageModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
-        <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
-            <div class="w-full flex justify-between items-center mb-4 text-white">
-                <h3 id="modalTitle" class="text-xl font-bold">Vista Previa</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-3xl">&times;</button>
+    <div id="imageModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center p-4" onclick="closeModalOnClickOutside(event)">
+        <div class="relative max-w-6xl w-full flex flex-col items-center">
+            
+            <div class="w-full flex justify-between items-center mb-4 text-white z-10">
+                <h3 id="modalTitle" class="text-xl font-bold flex items-center">
+                    <i class="fas fa-eye text-blue-500 mr-3"></i> <span id="titleText">Vista Previa</span>
+                </h3>
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <img id="modalImage" src="" alt="Full Preview" class="max-w-full max-h-[80vh] rounded shadow-2xl border border-slate-700 object-contain">
-            <p class="text-slate-500 text-xs mt-4">Haga clic fuera de la imagen para cerrar</p>
+
+            <div id="zoomContainer" class="w-full relative border border-slate-700 shadow-2xl bg-[#161b2a]">
+                <img id="modalImage" src="" alt="Full Preview">
+            </div>
+            
+            <div class="mt-4 flex gap-4 text-xs text-slate-400 font-mono bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800">
+                <span><i class="fas fa-mouse-pointer mr-2"></i>Click: Zoom In/Out</span>
+                <span class="text-slate-600">|</span>
+                <span><i class="fas fa-hand-paper mr-2"></i>Arrastrar: Navegar</span>
+            </div>
+
         </div>
     </div>
 
     <script>
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const zoomContainer = document.getElementById('zoomContainer');
+        const body = document.body;
+        const titleText = document.getElementById('titleText');
+
+        let isZoomed = false;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+        const scaleFactor = 2.5; // Factor de zoom (2.5x)
+
+        // --- Funciones Principales del Modal ---
         function openModal(imgSrc, title) {
-            document.getElementById('modalImage').src = imgSrc;
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('imageModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scroll
+            modalImage.src = imgSrc;
+            titleText.innerText = title;
+            modal.classList.remove('hidden');
+            body.style.overflow = 'hidden'; // Bloquear scroll traserio
+            resetZoom(); // Siempre empezar sin zoom
         }
 
         function closeModal() {
-            document.getElementById('imageModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Restore scroll
+            modal.classList.add('hidden');
+            body.style.overflow = 'auto'; // Restaurar scroll
+            setTimeout(resetZoom, 300); // Resetear después de la transición de cierre
         }
 
-        // Close on Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape") {
+        // Cerrar si se hace click en el fondo negro (fuera de la imagen)
+        function closeModalOnClickOutside(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && !modal.classList.contains('hidden')) {
                 closeModal();
             }
         });
+
+        // --- Lógica de Zoom y Paneo (Arrastre) ---
+
+        function resetZoom() {
+            isZoomed = false;
+            translateX = 0;
+            translateY = 0;
+            modalImage.style.transform = `scale(1) translate(0px, 0px)`;
+            zoomContainer.classList.remove('cursor-grab', 'cursor-grabbing');
+            zoomContainer.classList.add('cursor-zoom-in');
+        }
+
+        function toggleZoom(e) {
+            // Evitar que un click rápido después de arrastrar active el zoom
+            if (isDragging) return; 
+
+            isZoomed = !isZoomed;
+
+            if (isZoomed) {
+                // Aplicar Zoom
+                modalImage.style.transform = `scale(${scaleFactor}) translate(0px, 0px)`;
+                zoomContainer.classList.remove('cursor-zoom-in');
+                zoomContainer.classList.add('cursor-grab');
+                // Resetear traslación al hacer zoom in fresco
+                translateX = 0; translateY = 0;
+            } else {
+                resetZoom();
+            }
+        }
+
+        // --- Event Listeners para Interacción ---
+
+        // 1. Click para Zoom In/Out
+        zoomContainer.addEventListener('click', toggleZoom);
+
+        // 2. Iniciar Arrastre (MouseDown)
+        zoomContainer.addEventListener('mousedown', (e) => {
+            if (!isZoomed) return; // Solo arrastrar si está con zoom
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            zoomContainer.classList.replace('cursor-grab', 'cursor-grabbing');
+            e.preventDefault(); // Evitar comportamiento de arrastre nativo del navegador
+        });
+
+        // 3. Mover Imagen (MouseMove en Ventana)
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging || !isZoomed) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            // Aplicar transformación combinada: Escala + Nueva Posición
+            modalImage.style.transform = `scale(${scaleFactor}) translate(${translateX}px, ${translateY}px)`;
+        });
+
+        // 4. Terminar Arrastre (MouseUp en Ventana)
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                zoomContainer.classList.replace('cursor-grabbing', 'cursor-grab');
+            }
+        });
+
+        // 5. Seguridad: Si el mouse sale de la ventana, detener arrastre
+        window.addEventListener('mouseleave', () => {
+             if (isDragging) {
+                isDragging = false;
+                zoomContainer.classList.replace('cursor-grabbing', 'cursor-grab');
+            }
+        });
+
     </script>
 </body>
 </html>
