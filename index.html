@@ -3,135 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro de Reportes Operativos | Pixmedia</title>
+    <title>Suite Operativa | Pixmedia Agency</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
-        .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; background: rgba(30, 41, 59, 0.8); }
+        .glass-card { background: #161b2a; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .logo-pixmedia { width: 180px; height: auto; object-fit: contain; }
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        
+        /* Efecto de Imagen */
+        .img-overlay { position: relative; overflow: hidden; aspect-ratio: 16/9; }
+        .img-overlay img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform 0.5s ease; }
+        .glass-card:hover .img-overlay img { transform: scale(1.05); }
+        .overlay-icon { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .glass-card:hover .overlay-icon { opacity: 1; }
+
+        /* Modal */
+        #imageModal { transition: opacity 0.3s ease; }
+        #imageModal.hidden { pointer-events: none; opacity: 0; }
+        #imageModal:not(.hidden) { pointer-events: auto; opacity: 1; }
     </style>
 </head>
 <body class="bg-[#0b0f1a] text-slate-300 font-sans min-h-screen flex flex-col">
 
     <header class="hero-gradient border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <img src="https://pixmedia.b-cdn.net/pixmedialogoblanco.png" alt="Pixmedia" class="logo-pixmedia">
             <div class="text-xs font-bold text-slate-500 uppercase tracking-widest hidden md:block">
-                Suite de Digitalización Operativa
+                Portafolio de Soluciones Operativas
             </div>
         </div>
     </header>
 
-    <div class="py-12 px-4 text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">Reporteadores de Estado de Fuerza</h1>
-        <p class="text-blue-400 font-medium mb-6">Seleccione el módulo operativo correspondiente</p>
-        <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-            <span class="status-dot bg-emerald-500 animate-pulse"></span> Sistemas En Línea
-        </div>
+    <div class="py-16 px-4 text-center border-b border-slate-900 bg-[#0f1420]">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Reportes de Estado de Fuerza</h1>
+        <p class="text-blue-400 font-medium text-lg mb-6">Digitalización de Procesos de Seguridad Privada</p>
+        <p class="max-w-2xl mx-auto text-slate-400 font-light leading-relaxed">
+            Suite de aplicaciones web progresivas (PWA) desarrolladas para reemplazar reportes de texto informales. 
+            Estas herramientas estandarizan la captura de datos, generan tarjetas visuales para WhatsApp y almacenan históricos CSV en servidores privados.
+        </p>
     </div>
 
-    <main class="flex-grow px-4 pb-16 max-w-6xl mx-auto w-full">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <main class="flex-grow px-4 py-16 max-w-7xl mx-auto w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <a href="novedades_braskem.php" class="glass-card rounded-xl p-6 flex flex-col group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-600/10 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-blue-600/20"></div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-blue-900/50 flex items-center justify-center text-blue-400 text-2xl border border-blue-800">
-                        <i class="fas fa-industry"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white leading-tight">Braskem Idesa</h3>
-                        <span class="text-xs text-slate-500 uppercase font-bold">Seguridad Patrimonial</span>
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/sqaTD0U.png', 'Braskem Idesa')">
+                <div class="img-overlay">
+                    <img src="http://imgfz.com/i/sqaTD0U.png" alt="Braskem UI">
+                    <div class="overlay-icon">
+                        <span class="bg-blue-600 text-white rounded-full p-3"><i class="fas fa-search-plus text-xl"></i></span>
                     </div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 flex-grow">Gestión de asistencia (Intra/Extramuros), control de patrullas y reporte de incidencias.</p>
-                <div class="mt-auto pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-500">v2.1 Stable</span>
-                    <span class="text-blue-400 text-xs font-bold group-hover:translate-x-1 transition">ACCEDER <i class="fas fa-arrow-right ml-1"></i></span>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-industry text-blue-500 text-lg"></i>
+                        <h3 class="text-lg font-bold text-white">Braskem Idesa</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 flex-grow">Sistema de control para seguridad patrimonial industrial. Gestiona asistencia Intramuros/Extramuros y checklist de patrullas con indicadores de estado.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-blue-300 bg-blue-900/30 rounded border border-blue-800">PHP 8</span>
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-slate-300 bg-slate-800 rounded border border-slate-700">CSV Log</span>
+                    </div>
                 </div>
-            </a>
+            </article>
 
-            <a href="novedades_tqpm.php" class="glass-card rounded-xl p-6 flex flex-col group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-600/10 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-cyan-600/20"></div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-cyan-900/50 flex items-center justify-center text-cyan-400 text-2xl border border-cyan-800">
-                        <i class="fas fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white leading-tight">Cazador TQPM</h3>
-                        <span class="text-xs text-slate-500 uppercase font-bold">Custodia Móvil</span>
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/8DBkKb0.png', 'Cazador TQPM')">
+                <div class="img-overlay">
+                    <img src="http://imgfz.com/i/8DBkKb0.png" alt="TQPM UI">
+                    <div class="overlay-icon">
+                        <span class="bg-cyan-600 text-white rounded-full p-3"><i class="fas fa-search-plus text-xl"></i></span>
                     </div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 flex-grow">Bitácora de recorridos disuasivos y registro de eventos de custodia en tiempo real.</p>
-                <div class="mt-auto pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-500">v1.1 Tactical</span>
-                    <span class="text-cyan-400 text-xs font-bold group-hover:translate-x-1 transition">ACCEDER <i class="fas fa-arrow-right ml-1"></i></span>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-shield-halved text-cyan-500 text-lg"></i>
+                        <h3 class="text-lg font-bold text-white">Cazador TQPM</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 flex-grow">Bitácora táctica para custodia móvil. Registra recorridos disuasivos y eventos de custodia en ruta mediante una interfaz oscura de bajo consumo.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-cyan-300 bg-cyan-900/30 rounded border border-cyan-800">Dark Mode</span>
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-slate-300 bg-slate-800 rounded border border-slate-700">Timeline</span>
+                    </div>
                 </div>
-            </a>
+            </article>
 
-            <a href="novedades_centurion.php" class="glass-card rounded-xl p-6 flex flex-col group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-600/10 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-emerald-600/20"></div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-emerald-900/50 flex items-center justify-center text-emerald-400 text-2xl border border-emerald-800">
-                        <i class="fas fa-truck-moving"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white leading-tight">Centurión</h3>
-                        <span class="text-xs text-slate-500 uppercase font-bold">Logística & Custodia</span>
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/l0I3CeZ.png', 'Centurión Logística')">
+                <div class="img-overlay">
+                    <img src="http://imgfz.com/i/l0I3CeZ.png" alt="Centurion UI">
+                    <div class="overlay-icon">
+                        <span class="bg-emerald-600 text-white rounded-full p-3"><i class="fas fa-search-plus text-xl"></i></span>
                     </div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 flex-grow">Control de estado de fuerza en sedes remotas (Silao/Braskem) y checklist de unidades blindadas.</p>
-                <div class="mt-auto pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-500">v3.0 Live</span>
-                    <span class="text-emerald-400 text-xs font-bold group-hover:translate-x-1 transition">ACCEDER <i class="fas fa-arrow-right ml-1"></i></span>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-truck-moving text-emerald-500 text-lg"></i>
+                        <h3 class="text-lg font-bold text-white">Centurión</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 flex-grow">Dashboard logístico para control de fuerza en sedes remotas (Silao/Braskem) y validación operativa de unidades blindadas.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-emerald-300 bg-emerald-900/30 rounded border border-emerald-800">Logística</span>
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-slate-300 bg-slate-800 rounded border border-slate-700">HTML2Canvas</span>
+                    </div>
                 </div>
-            </a>
+            </article>
 
-            <a href="novedades_veracruz.php" class="glass-card rounded-xl p-6 flex flex-col group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-yellow-600/10 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-yellow-600/20"></div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-yellow-900/50 flex items-center justify-center text-yellow-400 text-2xl border border-yellow-800">
-                        <i class="fas fa-city"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white leading-tight">SESCA Veracruz</h3>
-                        <span class="text-xs text-slate-500 uppercase font-bold">Seguridad Física</span>
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/BTPu2XG.png', 'SESCA Veracruz')">
+                <div class="img-overlay">
+                    <img src="http://imgfz.com/i/BTPu2XG.png" alt="Veracruz UI">
+                    <div class="overlay-icon">
+                        <span class="bg-yellow-600 text-white rounded-full p-3"><i class="fas fa-search-plus text-xl"></i></span>
                     </div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 flex-grow">Reporte de asistencia y cobertura por zonas (Boca del Río, Zona Norte). Cálculo automático de % de cobertura.</p>
-                <div class="mt-auto pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-500">v2.0 Regional</span>
-                    <span class="text-yellow-400 text-xs font-bold group-hover:translate-x-1 transition">ACCEDER <i class="fas fa-arrow-right ml-1"></i></span>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-city text-yellow-500 text-lg"></i>
+                        <h3 class="text-lg font-bold text-white">Regional Veracruz</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 flex-grow">Reporte de asistencia zonificado (Boca del Río/Norte). Calcula automáticamente el porcentaje de cobertura operativa.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-yellow-300 bg-yellow-900/30 rounded border border-yellow-800">Analytics</span>
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-slate-300 bg-slate-800 rounded border border-slate-700">Tailwind</span>
+                    </div>
                 </div>
-            </a>
+            </article>
 
-            <a href="novedades.php" class="glass-card rounded-xl p-6 flex flex-col group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-purple-600/10 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-purple-600/20"></div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-purple-900/50 flex items-center justify-center text-purple-400 text-2xl border border-purple-800">
-                        <i class="fas fa-building-shield"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white leading-tight">Gorat Coatzacoalcos</h3>
-                        <span class="text-xs text-slate-500 uppercase font-bold">Operaciones Base</span>
+            <article class="glass-card rounded-xl flex flex-col group cursor-pointer" onclick="openModal('http://imgfz.com/i/9OVPQcS.png', 'Gorat Master')">
+                <div class="img-overlay">
+                    <img src="http://imgfz.com/i/9OVPQcS.png" alt="Coatza UI">
+                    <div class="overlay-icon">
+                        <span class="bg-purple-600 text-white rounded-full p-3"><i class="fas fa-search-plus text-xl"></i></span>
                     </div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 flex-grow">Control maestro de servicios locales, agencia Corona y TQPM. Gestión de servicios especiales dinámicos.</p>
-                <div class="mt-auto pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-500">v4.0 Master</span>
-                    <span class="text-purple-400 text-xs font-bold group-hover:translate-x-1 transition">ACCEDER <i class="fas fa-arrow-right ml-1"></i></span>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-building-shield text-purple-500 text-lg"></i>
+                        <h3 class="text-lg font-bold text-white">Gorat Master</h3>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4 flex-grow">Panel de control principal para servicios locales y eventuales dinámicos. Gestiona la matriz completa de asistencia.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="px-2 py-1 text-[10px] uppercase font-bold text-purple-300 bg-purple-900/30 rounded border border-purple-800">Master Control</span>
+                    </div>
                 </div>
-            </a>
+            </article>
 
         </div>
     </main>
 
-    <footer class="py-6 border-t border-slate-800 bg-[#080c14] text-center mt-auto">
-        <p class="text-slate-600 text-[10px] uppercase tracking-[0.3em] font-bold">Pixmedia Agency | Tecnología Operativa</p>
+    <footer class="py-8 border-t border-slate-800 bg-[#080c14] text-center mt-auto">
+        <img src="https://pixmedia.b-cdn.net/pixmedialogoblanco.png" alt="Pixmedia" class="logo-pixmedia mx-auto mb-4 opacity-50 h-6">
+        <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">Tecnología Propietaria | Desarrollo Privado</p>
     </footer>
 
+    <div id="imageModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
+        <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-4 text-white">
+                <h3 id="modalTitle" class="text-xl font-bold">Vista Previa</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-3xl">&times;</button>
+            </div>
+            <img id="modalImage" src="" alt="Full Preview" class="max-w-full max-h-[80vh] rounded shadow-2xl border border-slate-700 object-contain">
+            <p class="text-slate-500 text-xs mt-4">Haga clic fuera de la imagen para cerrar</p>
+        </div>
+    </div>
+
+    <script>
+        function openModal(imgSrc, title) {
+            document.getElementById('modalImage').src = imgSrc;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scroll
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scroll
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
