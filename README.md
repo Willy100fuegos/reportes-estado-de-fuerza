@@ -12,9 +12,9 @@ Anteriormente, los supervisores y guardias reportaban sus novedades (asistencia,
 * ❌ Falta de estandarización visual.
 * ❌ Pérdida de información histórica en chats interminables.
 
-## ✅ La Solución: Reporteadores Web Progresivos
+## ✅ La Solución: Reporteadores Web Progresivos (PWA)
 
-Hemos desarrollado una suite de **Web Apps (PWA)** accesibles desde cualquier móvil, que permiten al operativo capturar datos mediante formularios intuitivos y generar automáticamente una **Tarjeta de Novedades (Imagen PNG)** lista para compartir, mientras el sistema almacena silenciosamente una base de datos histórica.
+Hemos desarrollado una suite de **Web Apps** ligeras accesibles desde cualquier móvil. Permiten al operativo capturar datos mediante formularios intuitivos y generar automáticamente una **Tarjeta de Novedades (Imagen PNG)** lista para compartir, mientras el sistema almacena silenciosamente una base de datos histórica en el servidor.
 
 ---
 
@@ -52,28 +52,43 @@ Hemos desarrollado una suite de **Web Apps (PWA)** accesibles desde cualquier m�
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🧠 Arquitectura de Datos (Flat-File System)
 
-Arquitectura **Monolito Ligero** diseñada para máxima velocidad y despliegue sin dependencias complejas.
+A diferencia de sistemas complejos, esta suite utiliza una arquitectura **Serverless-Like** basada en archivos planos, eliminando la necesidad de configurar bases de datos MySQL.
 
-| Componente | Tecnología | Función |
-| :--- | :--- | :--- |
-| **Backend** | **PHP 8.x** | Procesamiento de datos y gestión de archivos (CSV/JSON). |
-| **Persistencia** | **JSON Flat-File** | Base de datos NoSQL ligera para caché de estado (Persistencia de sesión). |
-| **Histórico** | **CSV** | Logs estructurados descargables para análisis en Excel/PowerBI. |
-| **Frontend** | **HTML5 + TailwindCSS** | Interfaz responsiva *Touch-Friendly*. |
-| **Renderizado** | **html2canvas** | Generación de imágenes (Screenshots) del reporte en el cliente. |
-| **Share API** | **Web Share API** | Integración nativa con WhatsApp/Telegram en móviles. |
+1.  **Persistencia Volátil (`database_*.json`):**
+    * Cada vez que un usuario edita un campo, el sistema guarda el estado en un archivo JSON.
+    * Esto permite "recuperar" el borrador si el usuario cierra el navegador o recarga la página.
+    
+2.  **Persistencia Histórica (`historial_*.csv`):**
+    * Al "Cerrar Turno" o "Guardar Historial", los datos se escriben en un archivo CSV acumulativo.
+    * **Autogeneración:** No es necesario crear estos archivos manualmente. El script PHP detecta si no existen y los crea automáticamente con los encabezados correctos (UTF-8 BOM compatible con Excel).
 
 ---
 
-## 🔄 Flujo de Trabajo (Workflow)
+## 🛠️ Stack Tecnológico
 
-1.  **Captura:** El guardia accede a la URL desde su celular y llena los contadores (+/-).
-2.  **Visualización:** El sistema genera una vista previa en tiempo real de la "Tarjeta".
-3.  **Digitalización:** Al presionar "Compartir", se genera una imagen PNG de alta calidad.
-4.  **Distribución:** La imagen se envía al grupo de WhatsApp de Coordinación.
-5.  **Archivo:** Automáticamente, los datos se guardan en el CSV histórico del servidor para auditoría.
+Arquitectura **Monolito Ligero** diseñada para máxima velocidad y despliegue sin dependencias.
+
+| Componente | Tecnología | Función |
+| :--- | :--- | :--- |
+| **Backend** | **PHP 8.x** | Procesamiento de datos y gestión de archivos (I/O). |
+| **Frontend** | **HTML5 + TailwindCSS** | Interfaz responsiva *Touch-Friendly*. |
+| **Renderizado** | **html2canvas** | Generación de imágenes (Screenshots) client-side. |
+| **Share API** | **Web Share API** | Integración nativa con WhatsApp/Telegram. |
+
+---
+
+## 👨‍💻 Guía de Despliegue (Deploy)
+
+Para instalar cualquiera de estos módulos en tu servidor (cPanel/Apache/Nginx):
+
+1.  **Subir Archivo:** Sube el archivo `.php` deseado (ej. `novedades_braskem.php`) a tu carpeta pública.
+2.  **Permisos de Escritura (Crucial):** Asegúrate de que la carpeta donde alojas el archivo tenga permisos de escritura (generalmente `755` o `777` en entornos controlados).
+    * *¿Por qué?* El script necesita permiso para crear y escribir los archivos `.json` y `.csv`.
+3.  **Listo:** Accede a la URL. El sistema creará los archivos de datos automáticamente en el primer uso.
+
+> **Nota:** Se recomienda agregar `*.json` y `*.csv` a tu `.gitignore` para no subir datos operativos reales al repositorio.
 
 ---
 **Desarrollado por:**
