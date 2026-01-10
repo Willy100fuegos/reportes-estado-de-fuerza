@@ -88,8 +88,6 @@ Para instalar cualquiera de estos módulos en tu servidor (cPanel/Apache/Nginx):
     * *¿Por qué?* El script necesita permiso para crear y escribir los archivos `.json` y `.csv`.
 3.  **Listo:** Accede a la URL. El sistema creará los archivos de datos automáticamente en el primer uso.
 
-> **Nota:** Se recomienda agregar `*.json` y `*.csv` a tu `.gitignore` para no subir datos operativos reales al repositorio.
-
 ---
 **Desarrollado por:**
 **William Velázquez Valenzuela**
