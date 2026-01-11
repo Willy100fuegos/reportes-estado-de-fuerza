@@ -3,7 +3,7 @@
  * SISTEMA DE REPORTE OPERATIVO - UNIDAD CAZADOR TQPM
  * Arquitectura: Monolito (PHP + JS + Tailwind)
  * Autor: Desarrollador Senior Full-Stack (IA)
- * Versión: 1.1.0 - Actualización Web Share API
+ * Versión: 1.2.0 - Hotfix: Indicador de Estado de Guardado y Validación de Escritura
  */
 
 // --- CONFIGURACIÓN Y RUTAS ---
@@ -17,8 +17,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Acción: Guardar Estado Actual (Persistencia Volátil)
     if (isset($input['action']) && $input['action'] === 'save_state') {
-        file_put_contents($dbFile, json_encode($input['data'], JSON_PRETTY_PRINT));
-        echo json_encode(['status' => 'success', 'message' => 'Estado guardado']);
+        // Verificar si se puede escribir
+        if (!is_writable(dirname($dbFile))) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Error de permisos en servidor']);
+            exit;
+        }
+
+        $bytes = file_put_contents($dbFile, json_encode($input['data'], JSON_PRETTY_PRINT));
+        
+        if ($bytes === false) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Fallo al escribir archivo']);
+        } else {
+            echo json_encode(['status' => 'success', 'message' => 'Estado guardado']);
+        }
         exit;
     }
 
@@ -112,6 +125,15 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             border-color: #60a5fa;
             color: white;
         }
+        /* Animación para indicador de guardado */
+        @keyframes pulse-dot {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .animate-save {
+            animation: pulse-dot 1s infinite;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 font-sans min-h-screen pb-20">
@@ -122,13 +144,21 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             <h1 class="text-xl font-bold text-blue-400 tracking-wider">
                 <i class="fa-solid fa-shield-halved mr-2"></i>CAZADOR TQPM
             </h1>
-            <div id="status-indicator" class="text-xs text-green-500 font-mono">
-                <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> ONLINE
+            <!-- INDICADOR DE ESTADO ROBUSTO -->
+            <div id="save-status" class="flex items-center space-x-2 bg-slate-900 px-3 py-1 rounded-full border border-slate-600">
+                <div id="save-dot" class="w-2 h-2 rounded-full bg-green-500"></div>
+                <span id="save-text" class="text-[10px] font-mono font-bold text-slate-300">LISTO</span>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 space-y-6">
+
+        <!-- ALERTA DE PERMISOS (Solo visible si falla) -->
+        <div id="error-banner" class="hidden bg-red-900/90 border-l-4 border-red-500 text-white p-4 mb-4 rounded shadow-lg animate-pulse">
+            <p class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ¡ATENCIÓN! NO SE ESTÁ GUARDANDO</p>
+            <p class="text-xs mt-1">El sistema no puede escribir en la memoria del servidor. Si recargas la página, perderás los datos. Contacta a soporte.</p>
+        </div>
 
         <!-- SECCIÓN 1: DATOS OPERATIVOS -->
         <section class="bg-slate-800 rounded-lg p-4 shadow-lg border border-slate-700">
@@ -136,7 +166,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                 1. Configuración de Turno
             </h2>
             <div class="grid grid-cols-1 gap-4">
-                <!-- Se eliminó el selector de Supervisor -->
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Seleccionar Turno</label>
                     <select id="input-turno" class="w-full bg-slate-900 border border-slate-600 rounded p-3 text-white focus:border-blue-500 outline-none">
@@ -308,34 +337,27 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
 
     <script>
         // --- 1. DATOS Y ESTADO ---
-        // Lista oficial de unidades
         const VEHICLES_DB = [
             "VAN YKY-060-B", "VAN XZJ-801-C", "VAN XYF-783-C",
             "VAN YNT-936-A", "VAN YUU-664-A", "VAN YCD-240-C",
             "L200 XJ-9637-B", "L200 YH-3039-A"
         ];
 
-        // Estado inicial desde PHP
         let appState = <?php echo $initialState; ?>;
 
         // --- 2. INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
             renderVehicleGrid();
-            // Cargar datos guardados en inputs
             document.getElementById('input-turno').value = appState.turno || "Diurno";
             document.getElementById('display-recorridos').innerText = appState.recorridos || 0;
             
-            // Listeners para actualización automática
             document.getElementById('input-turno').addEventListener('change', (e) => {
                 appState.turno = e.target.value;
                 autoSave();
                 updateCard();
             });
 
-            // Hora por defecto
             setNowTime();
-            
-            // Render inicial
             renderEventsList();
             updateCard();
         });
@@ -360,7 +382,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
         }
 
         // --- 4. LÓGICA DE NEGOCIO ---
-
         function updateRecorridos(delta) {
             let current = parseInt(appState.recorridos) || 0;
             current += delta;
@@ -375,8 +396,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             const hora = document.getElementById('custodia-hora').value;
             const ruta = document.getElementById('custodia-ruta').value;
             const otra = document.getElementById('custodia-otra').value.trim();
-            
-            // Obtener placas seleccionadas
             const checkboxes = document.querySelectorAll('.vehicle-check:checked');
             let unidades = Array.from(checkboxes).map(cb => cb.value);
             
@@ -386,7 +405,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                 alert("⚠ Debes seleccionar al menos un vehículo.");
                 return;
             }
-
             if (!hora) {
                 alert("⚠ Falta la hora.");
                 return;
@@ -401,10 +419,9 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
 
             appState.eventos.push(nuevoEvento);
             
-            // Reset form parcial
             document.querySelectorAll('.vehicle-check').forEach(cb => cb.checked = false);
             document.getElementById('custodia-otra').value = '';
-            setNowTime(); // Resetear hora a actual
+            setNowTime(); 
 
             renderEventsList();
             updateCard();
@@ -439,23 +456,16 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             `).join('');
         }
 
-        // --- 5. ACTUALIZACIÓN DE TARJETA Y TOTALES ---
-
         function updateCard() {
-            // Header
             document.getElementById('card-date').innerText = new Date().toLocaleDateString('es-MX');
             document.getElementById('card-turno').innerText = appState.turno;
-            // Se eliminó la actualización del supervisor
             document.getElementById('card-total-recorridos').innerText = appState.recorridos;
 
-            // Lista Visual
             const cardList = document.getElementById('card-events-list');
             if (appState.eventos.length === 0) {
                 cardList.innerHTML = '<p class="text-slate-600 text-center text-xs italic py-4">Sin actividad registrada</p>';
             } else {
-                // Ordenar por hora
                 const sortedEvents = [...appState.eventos].sort((a, b) => a.hora.localeCompare(b.hora));
-                
                 cardList.innerHTML = sortedEvents.map(ev => `
                     <div class="relative pl-4 border-l-2 border-slate-600 pb-2">
                         <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-blue-500"></div>
@@ -467,7 +477,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                     </div>
                 `).join('');
             }
-
             calculateTotals();
         }
 
@@ -478,14 +487,12 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             appState.eventos.forEach(ev => {
                 const count = ev.unidades.length;
                 totalVehiculos += count;
-                
                 if (!resumenRutas[ev.ruta]) resumenRutas[ev.ruta] = 0;
                 resumenRutas[ev.ruta] += count;
             });
 
             document.getElementById('card-total-vehiculos').innerText = totalVehiculos;
 
-            // Renderizar tabla resumen
             const tableBody = document.getElementById('card-summary-table');
             let html = '';
             for (const [ruta, cantidad] of Object.entries(resumenRutas)) {
@@ -497,30 +504,53 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                 `;
             }
             tableBody.innerHTML = html;
-            
             return { totalVehiculos, resumenRutas };
         }
 
-        // --- 6. PERSISTENCIA Y COMPARTIR ---
+        // --- 6. PERSISTENCIA ROBUSTA ---
 
         async function autoSave() {
+            const dot = document.getElementById('save-dot');
+            const text = document.getElementById('save-text');
+            const errorBanner = document.getElementById('error-banner');
+            
+            // Estado: Guardando
+            dot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-save';
+            text.innerText = "GUARDANDO...";
+            text.className = "text-[10px] font-mono font-bold text-blue-300";
+
             try {
-                await fetch('novedades_tqpm.php', {
+                const response = await fetch('novedades_tqpm.php', {
                     method: 'POST',
                     body: JSON.stringify({ action: 'save_state', data: appState })
                 });
+
+                if (!response.ok) throw new Error('Server error');
+
+                // Estado: Éxito
+                setTimeout(() => {
+                    dot.className = 'w-2 h-2 rounded-full bg-green-500';
+                    text.innerText = "NUBE SEGURA";
+                    text.className = "text-[10px] font-mono font-bold text-green-500";
+                    errorBanner.classList.add('hidden');
+                }, 500);
+
             } catch (e) {
-                console.error("Error autosave", e);
+                console.error("Error critico autosave", e);
+                // Estado: ERROR CRÍTICO
+                dot.className = 'w-2 h-2 rounded-full bg-red-600 animate-pulse';
+                text.innerText = "ERROR ESCRITURA";
+                text.className = "text-[10px] font-mono font-bold text-red-500";
+                errorBanner.classList.remove('hidden');
             }
         }
 
-        // FUNCION PRINCIPAL: COMPARTIR EN WHATSAPP
         function shareOnWhatsapp() {
             const target = document.getElementById('capture-target');
             const loader = document.getElementById('loader');
             
             loader.classList.remove('hidden'); 
-            window.scrollTo(0,0); // Evitar glitches de scroll
+            window.scrollTo(0,0); 
 
             html2canvas(target, {
                 scale: 2,
@@ -530,7 +560,6 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                 canvas.toBlob(blob => {
                     const file = new File([blob], "reporte_cazador.png", { type: "image/png" });
                     
-                    // Verificar si el navegador soporta compartir archivos (Mobile)
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         navigator.share({
                             files: [file],
@@ -543,13 +572,12 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                             loader.classList.add('hidden');
                         });
                     } else {
-                        // Fallback para PC: Descargar imagen
                         loader.classList.add('hidden');
                         const link = document.createElement('a');
                         link.download = `Cazador_Reporte_${new Date().getTime()}.png`;
                         link.href = canvas.toDataURL("image/png");
                         link.click();
-                        alert("ℹ En PC no se puede abrir WhatsApp directamente con la imagen. La imagen se ha descargado; por favor, adjúntala manualmente en WhatsApp Web.");
+                        alert("ℹ En PC descargamos la imagen para que la adjuntes manualmente.");
                     }
                 }, 'image/png');
             }).catch(err => {
@@ -581,6 +609,9 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                         log_summary: logText
                     })
                 });
+                
+                if (!response.ok) throw new Error('Error al escribir historial');
+                
                 const res = await response.json();
                 
                 if (res.status === 'success') {
@@ -588,7 +619,7 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                     location.reload(); 
                 }
             } catch (e) {
-                alert("Error al guardar historial");
+                alert("Error CRÍTICO al guardar historial. Verifica permisos.");
             } finally {
                 loader.classList.add('hidden');
             }
