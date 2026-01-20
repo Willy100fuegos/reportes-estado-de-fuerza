@@ -3,7 +3,7 @@
  * SISTEMA DE REPORTE OPERATIVO - UNIDAD CAZADOR TQPM
  * Arquitectura: Monolito (PHP + JS + Tailwind)
  * Autor: Desarrollador Senior Full-Stack (IA)
- * Versión: 1.2.0 - Hotfix: Indicador de Estado de Guardado y Validación de Escritura
+ * Versión: 1.3.0 - Actualización: Nuevas Unidades y Corrección de Conteo Múltiple
  */
 
 // --- CONFIGURACIÓN Y RUTAS ---
@@ -220,7 +220,8 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
                     </div>
                     <!-- Campo "Otra" -->
                     <div class="mt-2">
-                        <input type="text" id="custodia-otra" placeholder="Otra unidad (Placa/ID)" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-sm text-white focus:border-blue-500">
+                        <label class="block text-[10px] text-slate-500 mb-1">Otras (Separadas por coma: Unidad 1, Unidad 2...)</label>
+                        <input type="text" id="custodia-otra" placeholder="Ej: Van-44, Lobo-55, Jetta-12" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-sm text-white focus:border-blue-500">
                     </div>
                 </div>
 
@@ -337,10 +338,13 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
 
     <script>
         // --- 1. DATOS Y ESTADO ---
+        // Lista ACTUALIZADA de unidades
         const VEHICLES_DB = [
             "VAN YKY-060-B", "VAN XZJ-801-C", "VAN XYF-783-C",
             "VAN YNT-936-A", "VAN YUU-664-A", "VAN YCD-240-C",
-            "L200 XJ-9637-B", "L200 YH-3039-A"
+            "L200 XJ-9637-B", "L200 YH-3039-A",
+            // Nuevas Adiciones
+            "VAN YDR-976-B", "CRV-GRIS- YPT-146-B", "L200 YL-7990-A"
         ];
 
         let appState = <?php echo $initialState; ?>;
@@ -397,9 +401,21 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
             const ruta = document.getElementById('custodia-ruta').value;
             const otra = document.getElementById('custodia-otra').value.trim();
             const checkboxes = document.querySelectorAll('.vehicle-check:checked');
+            
+            // Array base con las seleccionadas
             let unidades = Array.from(checkboxes).map(cb => cb.value);
             
-            if (otra) unidades.push(otra.toUpperCase());
+            // LOGICA MEJORADA DE CONTEO
+            // Si el campo "Otra" tiene texto, lo procesamos
+            if (otra) {
+                // Separamos por comas, quitamos espacios extra y filtramos vacios
+                const extras = otra.split(',')
+                                   .map(u => u.trim().toUpperCase())
+                                   .filter(u => u.length > 0);
+                
+                // Añadimos cada unidad individual al array
+                unidades.push(...extras);
+            }
 
             if (unidades.length === 0) {
                 alert("⚠ Debes seleccionar al menos un vehículo.");
@@ -419,6 +435,7 @@ $initialState = file_exists($dbFile) ? file_get_contents($dbFile) : json_encode(
 
             appState.eventos.push(nuevoEvento);
             
+            // Reset UI
             document.querySelectorAll('.vehicle-check').forEach(cb => cb.checked = false);
             document.getElementById('custodia-otra').value = '';
             setNowTime(); 
