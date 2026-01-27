@@ -7,28 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos Base */
-        .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+       .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .glass-card { background: #161b2a; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
         .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .logo-pixmedia { width: 180px; height: auto; object-fit: contain; }
         
-        /* Efecto de Imagen en Tarjeta */
         .img-overlay { position: relative; overflow: hidden; aspect-ratio: 16/9; }
         .img-overlay img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform 0.5s ease; }
         .glass-card:hover .img-overlay img { transform: scale(1.05); }
         .overlay-icon { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
         .glass-card:hover .overlay-icon { opacity: 1; }
 
-        /* --- Estilos del Modal y Zoom --- */
         #imageModal { transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         #imageModal.hidden { pointer-events: none; opacity: 0; }
         #imageModal:not(.hidden) { pointer-events: auto; opacity: 1; }
 
-        /* Contenedor de la imagen zoomable */
         #zoomContainer {
             overflow: hidden;
-            /* Altura máxima relativa a la pantalla para evitar scroll del body */
             max-height: 85vh; 
             display: flex;
             justify-content: center;
@@ -39,18 +34,15 @@
         }
 
         #modalImage {
-            /* Importante: max-width/height inicial para que quepa en pantalla sin zoom */
             max-width: 100%;
             max-height: 80vh; 
             object-fit: contain;
             transform-origin: center center;
             transition: transform 0.3s ease-out; /* Transición suave al hacer zoom */
-            /* Evita que la imagen se ponga azul al arrastrar */
             user-select: none; 
             -webkit-user-drag: none;
         }
 
-        /* Clases utilitarias para los cursores de arrastre */
         .cursor-grab { cursor: grab !important; }
         .cursor-grabbing { cursor: grabbing !important; }
     </style>
@@ -222,7 +214,6 @@
         let startX, startY, translateX = 0, translateY = 0;
         const scaleFactor = 2.5; // Factor de zoom (2.5x)
 
-        // --- Funciones Principales del Modal ---
         function openModal(imgSrc, title) {
             modalImage.src = imgSrc;
             titleText.innerText = title;
@@ -237,21 +228,18 @@
             setTimeout(resetZoom, 300); // Resetear después de la transición de cierre
         }
 
-        // Cerrar si se hace click en el fondo negro (fuera de la imagen)
         function closeModalOnClickOutside(event) {
             if (event.target === modal) {
                 closeModal();
             }
         }
 
-        // Cerrar con tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape" && !modal.classList.contains('hidden')) {
                 closeModal();
             }
         });
 
-        // --- Lógica de Zoom y Paneo (Arrastre) ---
 
         function resetZoom() {
             isZoomed = false;
@@ -282,10 +270,8 @@
 
         // --- Event Listeners para Interacción ---
 
-        // 1. Click para Zoom In/Out
         zoomContainer.addEventListener('click', toggleZoom);
 
-        // 2. Iniciar Arrastre (MouseDown)
         zoomContainer.addEventListener('mousedown', (e) => {
             if (!isZoomed) return; // Solo arrastrar si está con zoom
             isDragging = true;
@@ -295,7 +281,6 @@
             e.preventDefault(); // Evitar comportamiento de arrastre nativo del navegador
         });
 
-        // 3. Mover Imagen (MouseMove en Ventana)
         window.addEventListener('mousemove', (e) => {
             if (!isDragging || !isZoomed) return;
             translateX = e.clientX - startX;
@@ -304,7 +289,6 @@
             modalImage.style.transform = `scale(${scaleFactor}) translate(${translateX}px, ${translateY}px)`;
         });
 
-        // 4. Terminar Arrastre (MouseUp en Ventana)
         window.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -312,7 +296,6 @@
             }
         });
 
-        // 5. Seguridad: Si el mouse sale de la ventana, detener arrastre
         window.addEventListener('mouseleave', () => {
              if (isDragging) {
                 isDragging = false;
